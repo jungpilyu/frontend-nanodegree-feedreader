@@ -6,7 +6,7 @@
 
 This work was done as a partial fulfillment of the requirements for "Front-End Web Developer Nanodegree" of the Udacity. The project tests the Udacity feedreader application with Jamine javascript-testing framework.
 
-## External Library Dependency
+## External library dependency
 This project depends on [jQuery](https://jquery.com/), [handlebars](https://handlebarsjs.com/), and of course [Jasmine](http://jasmine.github.io/).
 
 ## Running tests
