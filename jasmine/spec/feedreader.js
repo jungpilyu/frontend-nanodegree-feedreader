@@ -34,7 +34,7 @@ $(function() {
          it('has a URL defined and is not empty', function() {
            allFeeds.forEach(function(aFeed) {
              expect(aFeed.url).toBeDefined();
-             expect(aFeed.url.length).not.toBe(0);
+             expect(aFeed.url).toMatch(/^http(|s)\:\/\//);
            })
          });
 
@@ -60,24 +60,21 @@ $(function() {
        * the CSS to determine how we're performing the
        * hiding/showing of the menu element.
        */
+        body = document.body;
        it('has the menu element hidden by default', function() {
-         body = $('body');
-         expect(body[0].className).toMatch('menu-hidden');
+         expect(body.className).toMatch('menu-hidden');
        });
        /* TODO: Write a test that ensures the menu changes
         * visibility when the menu icon is clicked. This test
         * should have two expectations: does the menu display when
         * clicked and does it hide when clicked again.
         */
-        it('becomes visible when clicked', function() {
-          menuIcon = $('.menu-icon-link');
-          menuIcon.on('click', function() {
-            body = $('body');
-            expect(body[0].className).toMatch('');
-          });
-        });
-        it('becomes hidden when clicked again', function() {
-
+        menuIcon = document.querySelector('.menu-icon-link');
+        it('becomes toggled when clicked', function() {
+          menuIcon.click();
+          expect(body.className).not.toMatch('menu-hidden');
+          menuIcon.click();
+          expect(body.className).toMatch('menu-hidden');
         });
 
     });
@@ -90,20 +87,47 @@ $(function() {
        * Remember, loadFeed() is asynchronous so this test will require
        * the use of Jasmine's beforeEach and asynchronous done() function.
        */
-       it('is a single .entry element in .feed container', function() {
-
+       beforeEach(function(done) {
+         loadFeed(0, done);
+       });
+       it('have at least one element in the feed container', function(done) {
+         numOfEntries = document.querySelectorAll('.feed .entry').length;
+         expect(numOfEntries).toBeGreaterThan(1);
+         done();
        });
     });
 
     /* TODO: Write a new test suite named "New Feed Selection" */
-    describe('Initial Entries', function() {
-        /* TODO: Write a test that ensures when a new feed is loaded
-         * by the loadFeed function that the content actually changes.
-         * Remember, loadFeed() is asynchronous.
-         */
-        it('ensures a new feed loaded by the LoadFeed()', function() {
-
-        });
-    });
-
+    const defineSuite = (oldID, newID) => {
+      describe(`New Feed Selection of ID=${newID} after ID=${oldID}`, function() {
+          /* TODO: Write a test that ensures when a new feed is loaded
+           * by the loadFeed function that the content actually changes.
+           * Remember, loadFeed() is asynchronous.
+           */
+           let oldContent;
+           let newContent;
+           container = document.querySelector('.feed');
+           beforeEach(function(done) {
+             loadFeed(oldID, function() {
+               oldContent = container.innerText;
+               loadFeed(newID, done);
+             });
+           });
+          it(`ensures the new feed content different from the previous one`, function(done) {
+            newContent = container.innerText;
+            expect(oldContent).not.toEqual(newContent);
+            done();
+          });
+      });
+    }
+    const num = allFeeds.length;
+    /* call defineSuite() with all selection combination. */
+    for(let i = 0; i < num; i++) {
+      for(let j = i + 1; j < num; j++) {
+        defineSuite(i, j); /* selection of ID=j after ID=i */
+        defineSuite(j, i); /* selection of ID=i after ID=j */
+      }
+    }
+    /* now load the initial feed */
+    loadFeed(0);
 }());
